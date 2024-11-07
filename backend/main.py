@@ -4,6 +4,7 @@ from typing import Optional
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
+from fastapi.middleware.cors import CORSMiddleware
 
 # Configuración básica para la generación de JWT
 SECRET_KEY = "your_secret_key"
@@ -65,6 +66,14 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 
 # FastAPI app
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://127.0.0.1:5000/", "http://127.0.0.1:5173/"],  # Añade la URL de tu frontend aquí
+    allow_credentials=True,
+    allow_methods=[""],
+    allow_headers=[""],
+)
 
 # Ruta de registro
 @app.post("/register")
