@@ -1,41 +1,35 @@
-from auth.decodeAuth import decodeJWT
-from fastapi import HTTPException, Request, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi import Security, HTTPException, Depends
+from fastapi.security import HTTPBearer
+from jwt_manage import decodeJWT
+from hash_password import verify_password
+from database_services import get_user
 
 
-class JWTBearer(HTTPBearer):
-    def __init__(self, auto_error: bool = True, level: int = 0):
-        super(JWTBearer, self).__init__(auto_error=auto_error)
-        self.level = level
+JWT_header = HTTPBearer()
 
-    async def __call__(self, request: Request):
-        credentials: HTTPAuthorizationCredentials = await super(
-            JWTBearer, self
-        ).__call__(request)
+
+async def validates_jwt(
+    jwt_header = Security(JWT_header),
+):
+
+    decode = decodeJWT(jwt_header.credentials)
+
+    if not decode:
+        raise HTTPException(status_code=401, detail="Invalid Token")
     
-        if credentials:
-            if not credentials.scheme == "Bearer":
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Invalid authentication scheme.",
-                )
-            return self.verify_jwt(credentials.credentials)
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid authorization code.",
-            )
+    user_data = get_user(decode["username"])
 
-    def verify_jwt(self, jwtoken: str) -> models.Dispatcher:
-        try:
-            payload = decodeJWT(jwtoken)
-        except:
-            payload = None
+    if not user_data:
+        raise HTTPException(status_code=401, detail="Invalid Token")
+    
+    return user_data
 
-        if payload:
-            pass
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="d: Invalid token or expired token.",
-            )
+
+def validates_login(username:str, password:str):
+
+    user_data = get_user(username)
+
+    if bool(user_data) and verify_password(plain_password=password, hashed_password=user_data["password"]):
+        return True
+    return False
+    
