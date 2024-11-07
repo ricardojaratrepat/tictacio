@@ -1,5 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi import FastAPI, Depends, HTTPException, status, Header
 from pydantic import BaseModel
 from typing import Optional
 from jose import JWTError, jwt
@@ -16,9 +15,6 @@ fake_users_db = {}
 
 # Configuración de hashing de contraseñas
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-# Esquema de autenticación para las rutas protegidas
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 # Modelos de Pydantic
 class User(BaseModel):
@@ -72,14 +68,14 @@ app = FastAPI()
 
 # Ruta de registro
 @app.post("/register")
-async def register(login_request: LoginRequest):
-    if login_request.username in fake_users_db:
+async def register(username: str, password: str):
+    if username in fake_users_db:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Username already registered",
         )
-    hashed_password = get_password_hash(login_request.password)
-    fake_users_db[login_request.username] = {"username": login_request.username, "hashed_password": hashed_password}
+    hashed_password = get_password_hash(password)
+    fake_users_db[username] = {"username": username, "hashed_password": hashed_password}
     return {"message": "User registered successfully"}
 
 # Ruta de login
@@ -95,14 +91,23 @@ async def login(login_request: LoginRequest):
     access_token = create_access_token(data={"sub": user.username})
     return {"access_token": access_token, "token_type": "bearer"}
 
-# Ruta protegida (requiere autenticación)
+# Ruta protegida (requiere autenticación con Bearer token simple)
 @app.get("/protected-route")
-async def protected_route(token: str = Depends(oauth2_scheme)):
+async def protected_route(authorization: Optional[str] = Header(None)):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Bearer token missing or invalid",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    token = authorization.split(" ")[1]  # Extrae el token después de "Bearer"
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
+
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
