@@ -22,9 +22,9 @@
         <Home />
     {:else if currentView === "login"}
         <Login on:loginSuccess={(e) => handleLoginSuccess(e.detail)} />
-        <p>¿No tienes una cuenta? <a href="javascript:void(0)" on:click={() => currentView = "register"}>Regístrate aquí</a></p>
+			<p>¿No tienes una cuenta? <button on:click={() => currentView = "register"}>Regístrate aquí</button></p>
     {:else if currentView === "register"}
         <Register on:registerSuccess={handleRegisterSuccess} />
-        <p>¿Ya tienes una cuenta? <a href="javascript:void(0)" on:click={() => currentView = "login"}>Inicia sesión aquí</a></p>
+        <p>¿Ya tienes una cuenta? <button on:click={() => currentView = "login"}>Inicia sesión aquí</button></p>
     {/if}
 </main>
