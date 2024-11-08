@@ -54,8 +54,8 @@ async def protected_route(jwt_data: jwt_dependency):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8080/", "http://127.0.0.1:8080/"],  # Especifica los orígenes de tu frontend
+    allow_origins=["http://localhost:8080", "http://127.0.0.1:8080"],  # Especifica los orígenes de tu frontend
     allow_credentials=True,
-    allow_methods=[""],  # Permite todos los métodos HTTP
-    allow_headers=[""],  # Permite todos los encabezados necesarios
+    allow_methods=["*"],  # Permite todos los métodos HTTP
+    allow_headers=["*"],  # Permite todos los encabezados necesarios
 )
