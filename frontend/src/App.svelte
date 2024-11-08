@@ -1,31 +1,30 @@
 <script>
     import Login from "./components/Login.svelte";
     import Register from "./components/Register.svelte";
-    import ProtectedRoute from "./components/ProtectedRoute.svelte";
+    import Home from "./components/Home.svelte";
 
-    let token = localStorage.getItem("token"); // Para saber si el usuario está autenticado
-    let currentView = "login"; // Vista actual: "login" o "register"
+    let currentView = "login";
+    let isAuthenticated = false;
 
-    function goToRegister() {
-        currentView = "register";
+    function handleLoginSuccess(accessToken) {
+        localStorage.setItem("token", accessToken); 
+        isAuthenticated = true;
+        currentView = "home"; 
     }
 
-    function goToLogin() {
+    function handleRegisterSuccess() {
         currentView = "login";
     }
 </script>
 
 <main>
-    {#if token}
-        <ProtectedRoute />
-    {:else}
-        <!-- Mostrar el componente adecuado según la vista actual -->
-        {#if currentView === "login"}
-            <Login />
-            <p>¿No tienes una cuenta? <a href="#" on:click={goToRegister}>Regístrate aquí</a></p>
-        {:else if currentView === "register"}
-            <Register />
-            <p>¿Ya tienes una cuenta? <a href="#" on:click={goToLogin}>Inicia sesión aquí</a></p>
-        {/if}
+    {#if isAuthenticated && currentView === "home"}
+        <Home />
+    {:else if currentView === "login"}
+        <Login on:loginSuccess={(e) => handleLoginSuccess(e.detail)} />
+        <p>¿No tienes una cuenta? <a href="javascript:void(0)" on:click={() => currentView = "register"}>Regístrate aquí</a></p>
+    {:else if currentView === "register"}
+        <Register on:registerSuccess={handleRegisterSuccess} />
+        <p>¿Ya tienes una cuenta? <a href="javascript:void(0)" on:click={() => currentView = "login"}>Inicia sesión aquí</a></p>
     {/if}
 </main>
