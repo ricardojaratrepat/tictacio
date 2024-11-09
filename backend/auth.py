@@ -17,7 +17,7 @@ async def validates_jwt(
     if not decode:
         raise HTTPException(status_code=401, detail="Invalid Token")
     
-    user_data = get_user(decode["username"])
+    user_data = await get_user(decode["username"])
 
     if not user_data:
         raise HTTPException(status_code=401, detail="Invalid Token")
@@ -25,9 +25,9 @@ async def validates_jwt(
     return user_data
 
 
-def validates_login(username:str, password:str):
+async def validates_login(username:str, password:str):
 
-    user_data = get_user(username)
+    user_data = await get_user(username)
 
     if bool(user_data) and verify_password(plain_password=password, hashed_password=user_data["password"]):
         return True

@@ -1,5 +1,4 @@
 from fastapi import FastAPI, Depends, HTTPException, status, Header
-from pydantic import BaseModel
 from typing import Optional, Annotated
 from jose import JWTError, jwt
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,21 +6,41 @@ from fastapi.middleware.cors import CORSMiddleware
 from auth import validates_jwt, validates_login
 from jwt_manage import encodeJWT
 from database_services import add_user
-from hash_password import get_password_hash
 
-class LoginBody(BaseModel):
-    username: str
-    password: str
+from models import User
+
+from database import client
+import logging
 
 jwt_dependency = Annotated[dict, Depends(validates_jwt)]
 
-# FastAPI app
+
 app = FastAPI()
+
+
+# Configuración de logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+@app.on_event("startup")
+async def startup_db_client():
+    try:
+        # Probar la conexión ejecutando una operación simple
+        await client.admin.command('ping')
+        logger.info("Successfully connected to MongoDB")
+    except Exception as e:
+        logger.error("Failed to connect to MongoDB", exc_info=True)
+        raise e  # Detiene el inicio del servidor si falla la conexión
+
+@app.on_event("shutdown")
+async def shutdown_db_client():
+    client.close()
+    logger.info("Disconnected from MongoDB")
 
 # Ruta de login
 @app.post("/login")
-async def login(login_request: LoginBody):
-    user = validates_login(login_request.username, login_request.password)
+async def login(login_request: User):
+    user = await validates_login(login_request.username, login_request.password)
     
     if not user:
         raise HTTPException(
@@ -34,8 +53,8 @@ async def login(login_request: LoginBody):
     return access_token
 
 @app.post("/register")
-async def register(login_request: LoginBody):
-    result = add_user(username=login_request.username, password=get_password_hash(login_request.password))
+async def register(login_request: User):
+    result = await add_user(username=login_request.username, password=login_request.password)
     if not result:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
