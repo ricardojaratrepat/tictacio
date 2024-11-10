@@ -7,18 +7,26 @@ services:
     container_name: mongodb
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_ROOT_PASSWORD: pass
     ports:
       - '27017:27017'
     networks:
       - mynetwork
+    healthcheck:
+      test: ["CMD-SHELL", "apt-get update && apt-get install -y curl && curl -f http://localhost:27017 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
 
   # Interfaz de MongoDB con Mongo Express
   mongo-express:
     image: mongo-express:latest
     container_name: mongo-express
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
     environment:
       ME_CONFIG_MONGODB_ADMINUSERNAME: admin
       ME_CONFIG_MONGODB_ADMINPASSWORD: password
@@ -37,12 +45,12 @@ services:
     ports:
       - '8000:8000'
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
     networks:
       - mynetwork
     environment:
       DB_URL: mongodb://admin:password@mongodb:27017/BookReviewDB?authSource=admin  # URL de conexión a MongoDB
-      # Puedes agregar otras variables de entorno que tu backend necesite
 
   # Frontend (Svelte)
   frontend:
