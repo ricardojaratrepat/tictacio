@@ -20,7 +20,6 @@ jobs:
         with:
           node-version: '16'
 
-      # Install dependencies and build the project
       - name: Install Dependencies and Build
         run: |
           npm install
