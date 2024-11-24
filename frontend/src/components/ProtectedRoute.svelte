@@ -1,10 +1,12 @@
 <script>
   let message = "";
   const token = localStorage.getItem("token");
+  const API_BASE_URL = process.env.API_BASE_URL;
 
   async function fetchProtectedData() {
     try {
-      const response = await fetch("http://127.0.0.1:8000/protected-route", {
+      const protectedRouteEndpoint = `${API_BASE_URL}/protected-route`;
+      const response = await fetch(protectedRouteEndpoint, {
         headers: {
           Authorization: `Bearer ${token}`
         }

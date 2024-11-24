@@ -1,14 +1,16 @@
 <script>
     import { createEventDispatcher } from "svelte";
     const dispatch = createEventDispatcher();
-
+    const API_BASE_URL = process.env.API_BASE_URL;
+    
     let username = "";
     let password = "";
     let message = "";
 
     async function handleLogin() {
         try {
-            const response = await fetch("http://localhost:8000/login", {
+            const loginEndpoint = `${API_BASE_URL}/login`;
+            const response = await fetch(loginEndpoint, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
