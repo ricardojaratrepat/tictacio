@@ -2,7 +2,7 @@
   let message = "";
   const token = localStorage.getItem("token");
   const API_BASE_URL = process.env.API_BASE_URL;
-
+  
   async function fetchProtectedData() {
     try {
       const protectedRouteEndpoint = `${API_BASE_URL}/protected-route`;

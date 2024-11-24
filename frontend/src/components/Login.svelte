@@ -2,7 +2,7 @@
     import { createEventDispatcher } from "svelte";
     const dispatch = createEventDispatcher();
     const API_BASE_URL = process.env.API_BASE_URL;
-    
+    console.log(API_BASE_URL);
     let username = "";
     let password = "";
     let message = "";
