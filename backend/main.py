@@ -22,6 +22,20 @@ app = FastAPI()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+@app.on_event("startup")
+async def startup_db_client():
+    try:
+        # Probar la conexión ejecutando una operación simple
+        await client.admin.command('ping')
+        logger.info("Successfully connected to MongoDB")
+    except Exception as e:
+        logger.error("Failed to connect to MongoDB", exc_info=True)
+        raise e  # Detiene el inicio del servidor si falla la conexión
+
+@app.on_event("shutdown")
+async def shutdown_db_client():
+    client.close()
+    logger.info("Disconnected from MongoDB")
 
 # Ruta de login
 @app.post("/login")
