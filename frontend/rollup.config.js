@@ -57,7 +57,7 @@ export default {
 		// Reemplazar las variables de entorno en tiempo de compilación
 		replace({
 			preventAssignment: true, // Prevenir advertencias de asignación
-			'process.env.API_BASE_URL': JSON.stringify(process.env.API_BASE_URL || 'http://localhost:8000') // Valor predeterminado
+			'process.env.API_BASE_URL': JSON.stringify(process.env.API_BASE_URL || 'https://tictacio.onrender.com') // Valor predeterminado
 		}),
 
 		// Resolver dependencias de npm
