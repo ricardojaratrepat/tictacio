@@ -1,18 +1,17 @@
 import adapter from '@sveltejs/adapter-static';
-import {
-    vitePreprocess
-} from '@sveltejs/kit/vite';
 
-/** @type {import('@sveltejs/kit').Config} */
-const config = {
-  preprocess: vitePreprocess(),
-
+export default {
   kit: {
-      adapter: adapter(),
-      paths: {
-          base: process.env.NODE_ENV === '' ? '/tictacio' : '',
-      }
-  }
+    adapter: adapter({
+      pages: 'public',  // Carpeta donde se generan los archivos estáticos
+      assets: 'public/build', // Carpeta para los activos como CSS y JS
+      fallback: null,  // Archivo HTML que se usará en caso de rutas no encontradas
+    }),
+    paths: {
+      base: '/tictacio', // Configuración adicional si tu proyecto usa un subdirectorio
+    },
+    prerender: {
+      default: true, // Habilita la pre-renderización para generar contenido estático
+    },
+  },
 };
-
-export default config;
