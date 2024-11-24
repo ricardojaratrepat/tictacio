@@ -7,8 +7,12 @@ import livereload from 'rollup-plugin-livereload';
 import css from 'rollup-plugin-css-only';
 import dotenv from 'dotenv';
 import replace from '@rollup/plugin-replace';
+import dotenvExpand from 'dotenv-expand';
 
-dotenv.config();
+const myEnv = dotenv.config();
+dotenvExpand.expand(myEnv);
+
+console.log('API_BASE_URL:', process.env.API_BASE_URL);
 
 const production = !process.env.ROLLUP_WATCH;
 
