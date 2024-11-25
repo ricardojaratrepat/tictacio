@@ -26,6 +26,9 @@ jobs:
         run: |
           npm install
           npm run build
+        env: 
+          API_BASE_URL: ${{ secrets.API_BASE_URL }}
+
 
       # Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
